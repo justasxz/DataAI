@@ -145,11 +145,53 @@ df = pd.DataFrame({
 # df2.rename(columns={'Name': 'Full Name', 'Age': 'Age in Years'}, inplace=True) # rename - pervadina stulpelius, columns - nurodo kuriuos stulpelius pervadinti, inplace - pakeicia originala, jei False - grazina nauja DataFrame
 # df = pd.concat([df, df2], ignore_index=True) # concat - sujungia du DataFrame i viena, ignore_index - ignoruoja originalius indexus ir sukuria naujus nuo 0 iki n-1
 # print(df)
-df = pd.read_csv(r'data/titanic_train.csv') # read_csv - nuskaito duomenis is csv failo ir sukuria DataFrame
-print(df)
-# df.info()
-# pd.read_sql_query
+# df = pd.read_csv(r'data/titanic_train.csv') # read_csv - nuskaito duomenis is csv failo ir sukuria DataFrame
+# print(df)
+# # df.info()
+# # pd.read_sql_query
 
-print(df.groupby('Sex')['PassengerId'].count()) # groupby - grupuoja duomenis pagal nurodyta stulpeli, count - suskaiciuoja kiek yra ne null reiksmiu kiekvienoje grupeje
-print(df.groupby('Pclass')['PassengerId'].count()) # groupby - grupuoja duomenis pagal nurodyta stulpeli, count - suskaiciuoja kiek yra ne null reiksmiu kiekvienoje grupeje
-print(df.groupby('Pclass')['Age'].mean()) # groupby - grupuoja duomen
+# print(df.groupby('Sex')['PassengerId'].count()) # groupby - grupuoja duomenis pagal nurodyta stulpeli, count - suskaiciuoja kiek yra ne null reiksmiu kiekvienoje grupeje
+# print(df.groupby('Pclass')['PassengerId'].count()) # groupby - grupuoja duomenis pagal nurodyta stulpeli, count - suskaiciuoja kiek yra ne null reiksmiu kiekvienoje grupeje
+# print(df.groupby('Pclass')['Age'].mean()) # groupby - grupuoja duomen
+
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# datele = [4,6,8,10,12,14,16,18,20]
+# x_datele = np.arange(10,100,10)
+
+# sns.lineplot(datele)
+# plt.show()
+
+# datele = [4,6,8,10,8,6,4,2,0]
+# x_datele = np.arange(10,100,10)
+
+# # sns.lineplot(x=x_datele, y=datele)
+# # plt.show()
+# sns.histplot(datele, bins=3) # histplot - sukuria histogramą, bins - nurodo kiek intervalų sukurti
+# plt.show()
+
+titanic = sns.load_dataset('titanic') # load_dataset - nuskaito duomenis is seaborn bibliotekos ir sukuria DataFrame
+# print(titanic)
+# titanic.info()
+# print(titanic.describe())
+
+# sns.histplot(titanic['age'], bins=10) # histplot - sukuria histogramą, bins - nurodo kiek intervalų sukurti
+# plt.show()
+# sns.lineplot(x='age', y='fare', data=titanic) # lineplot - sukuria linijinę diagramą, x - nurodo x ašį, y - nurodo y ašį, data - nurodo duomenis
+# plt.show()
+# bin ages for plotting
+# titanic['age_bin'] = pd.cut(titanic['age'], bins=[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75]) # cut - sukuria intervalus pagal nurodytus binus
+# # print(titanic['age_bin'])
+# sns.barplot(x='age_bin', y='fare', data=titanic) # barplot - sukuria stulpelinę diagramą, x - nurodo x ašį, y - nurodo y ašį, data - nurodo duomenis
+# plt.show()
+
+# print(titanic.select_dtypes(include=[np.number]).corr()) # corr - pateikia koreliacijos matrica, kuri parodo kaip stipriai du stulpeliai yra susiję, vertės tarp -1 ir 1, 1 - stipri teigiama koreliacija, -1 - stipri neigiama koreliacija, 0 - nėra koreliacijos
+# sns.heatmap(titanic.select_dtypes(include=[np.number]).corr(), annot=True, cmap='coolwarm') # heatmap - sukuria šilumos žemėlapį, annot - rodo koreliacijos reikšmes ant žemėlapio, cmap - nurodo spalvų paletę
+# plt.show()
+# sns.barplot(x='age', y='survived', data=titanic) # barplot - sukuria stulpelinę diagramą, x - nurodo x ašį, y - nurodo y ašį, data - nurodo duomenis
+# plt.show()
+# show how age affected survival
+# sns.barplot(x='age_bin', y='survived', data=titanic) # barplot - sukuria stulpelinę diagramą, x - nurodo x ašį, y - nurodo y ašį, data - nurodo duomenis
+# plt.show()
