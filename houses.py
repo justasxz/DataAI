@@ -5,9 +5,11 @@ from sklearn.model_selection import cross_val_score
 
 df = pd.read_csv('data/house_train.csv')
 # print(df)
-
-df = df.select_dtypes(include=['int64', 'float64']) # select_dtypes - pasirenka tik nurodytus duomenu tipus
-# print(df)
+df = pd.get_dummies(df)
+# df = df.select_dtypes(include=['int64', 'float64']) # select_dtypes - pasirenka tik nurodytus duomenu tipus
+df.info()
+df.to_csv('data/house_train_encoded.csv', index=False) # to_csv - issaugo DataFrame i csv faila, index - nurodo ar issaugoti indexa, jei False - issaugo be indexo
+# # print(df)
 df.dropna(inplace=True) # dropna - pasalina eilutes su null reiksmemis, inplace - pakeicia originala, jei False - grazina nauja DataFrame, thresh - nurodo kiek ne null reiksmiu turi buti eiluteje, kad ji butu issaugota
 # df.info()
 df.set_index('Id', inplace=True) # set_index - nustato nurodyta stulpeli kaip index, inplace - pakeicia originala, jei False - grazina nauja DataFrame
@@ -53,12 +55,24 @@ model.fit(X, y) # fit - train
 
 # test data
 df_test = pd.read_csv('data/house_test.csv')
-df_test = df_test.select_dtypes(include=['int64', 'float64']) # select_dtypes - pasirenka tik nurodytus duomenu tipus
-df_test.fillna(0,inplace=True) # dropna - pasalina eilutes su null reik
-df_test.set_index('Id', inplace=True) # set_index - nustato nurodyta stulpeli kaip index, inplace - pakeicia originala, jei False - grazina nauja DataFrame
-df_test_scaled = scaler.transform(df_test) # transform - normalizuoja duomenis, kad jie būtų tarp 0 ir 1, galima nurodyti tik tam tikrus stulpelius
-predictions = model.predict(df_test_scaled) # predict - prognozuoja reiksmes pagal
-# print(predictions)
+df_test = pd.get_dummies(df_test)
+df_test.set_index('Id', inplace=True) # Geriau indeksą nustatyti prieš sulygiuojant stulpelius
 
-submission = pd.DataFrame({'Id': df_test.index, 'SalePrice': predictions}) # sukuria DataFrame su dviem stulpeliais, Id - nurodo eiluciu numerius, SalePrice - nurodo prognozuotas reiksmes
-submission.to_csv('house_submission.csv', index=False) # to_csv - issaugo Data
+# Pridedame trūkstamus stulpelius, kurių nėra testavimo duomenyse
+missing_cols = set(df.columns) - set(df_test.columns)
+for col in missing_cols:
+    if col != 'SalePrice': 
+        df_test[col] = 0
+
+# ATKOMENTUOTA EILUTĖ: Išrikiuojame testavimo duomenų stulpelius, kad jie idealiai atitiktų treniravimo duomenis
+# Pastaba: 'SalePrice' stulpelio df_test neturi, todėl jį išmetame iš sąrašo, pagal kurį lygiuojame
+df_test = df_test[df.columns.drop('SalePrice')] 
+
+df_test.fillna(0, inplace=True) 
+
+# Dabar transformacija ir prognozė veiks be klaidų!
+df_test_scaled = scaler.transform(df_test) 
+predictions = model.predict(df_test_scaled) 
+
+submission = pd.DataFrame({'Id': df_test.index, 'SalePrice': predictions})
+submission.to_csv('house_submission.csv', index=False)
