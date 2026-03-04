@@ -1,6 +1,7 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 df = pd.read_csv('data/titanic_train.csv')
 # df.info()
@@ -18,6 +19,10 @@ df.set_index('PassengerId', inplace=True) # set_index - nustato nurodyta stulpel
 # most logical way to deal with age in titanic dataset
 df['Age'] = df['Age'].fillna(df.groupby(['Pclass', 'Sex'])['Age'].transform('mean')) # fillna - uzpildo null reiksmes nurodytu skaiciu, galima nurodyti skirtingas reiksmes skirtingiems stulpeliams
 # print(df.head(20))
+
+scaler = MinMaxScaler() # MinMaxScaler - normalizuoja duomenis, kad jie būtų tarp 0 ir 1
+# df[['Age', 'Fare','Pclass','SibSp','Parch']] = scaler.fit_transform(df[['Age', 'Fare','Pclass','SibSp','Parch']]) # fit_transform - normalizuoja duomenis, kad jie būtų tarp 0 ir 1, galima nurodyti tik tam tikrus stulpelius
+print(df.head(20))
 
 train_X, val_X, train_y, val_y = train_test_split(df.drop('Survived', axis=1), df['Survived'], test_size=0.30, random_state=42) # train_test_split - padalina duomenis i mokymo ir testavimo dalis, test_size - nurodo kiek procentu duomenu skirti testavimui, random_state - nustato atsitiktinumo sėklą, kad rezultatai būtų atkuriami
 # test_X, val_X, test_y, val_y = train_test_split(val_X, val_y, test_size=0.50, random_state=42) # train_test_split - padalina duomenis i mokymo ir testavimo dalis, test_size - nurodo kiek procentu duomenu skirti testavimui, random_state - nustato atsitiktinumo sėklą, kad rezultatai būtų atkuriami
@@ -49,19 +54,52 @@ df_test.info()
 df_test.set_index('PassengerId', inplace=True) # set_index - nustato nurodyta stulpeli kaip index, inplace - pakeicia originala, jei False - grazina nauja DataFrame
 print(df_test.head(20))
 df_test['Fare'] = df_test['Fare'].fillna(df_test['Fare'].mean()) # fillna - uzpildo null reiksmes nurodytu skaiciu, galima nurodyti skirtingas reiksmes skirtingiems stulpeliams
+# df_test[['Age', 'Fare','Pclass','SibSp','Parch']] = scaler.transform(df_test[['Age', 'Fare','Pclass','SibSp','Parch']]) # transform - normalizuoja duomenis, kad jie būtų tarp 0 ir 1, galima nurodyti tik tam tikrus stulpelius
 
 pred_val = model.predict(val_X) # predict - prognozuoja reiksmes pagal mokymo duomenis
 print(pred_val)
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+# import table with all metrics
+from sklearn.metrics import classification_report #, mean_absolute_error, mean_squared_error
+# print(classification_report(val_y, pred_val)) # classification_report - pateikia ataskait
+
+from sklearn.neighbors import KNeighborsClassifier
+
+k_values = list(range(1, 31))
+accuracies = []
+
 print(accuracy_score(val_y, pred_val)) # accuracy_score - apskaiciuoja tiksluma, lygina tikslas reiksmes su prognozuotomis reiksmes, grazina tiksluma procentais
+for k in range(1, 31):
+    knn_model = KNeighborsClassifier(n_neighbors=k) # KNeighborsClassifier - sukuria K artimiausių kaimynų klasifikatoriaus modelį, n_neighbors - nurodo kiek artimiausių kaimynų naudoti prognozavimui
+    knn_model.fit(train_X, train_y) # fit - train
+    knn_pred_val = knn_model.predict(val_X) # predict - prognozuoja reiksmes pagal mokymo duomenis
+    accuracy = accuracy_score(val_y, knn_pred_val)
+    accuracies.append(accuracy)
+    print(f'K={k}, Accuracy: {accuracy}') # accuracy_score - apskaiciuoja tiksluma, lygina tikslas reiksmes su prognozuotomis reiksmes, grazina tiksluma procentais
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+plt.figure(figsize=(10, 6))
+sns.lineplot(x=k_values, y=accuracies, marker='o') # lineplot
+plt.title('KNN Accuracy for Different K Values')
+plt.xlabel('K Value')
+plt.ylabel('Accuracy')
+plt.xticks(k_values)
+plt.grid()
+plt.show()
+
+# print(precision_score(val_y, pred_val))
+# print(recall_score(val_y, pred_val))
+# print(f1_score(val_y, pred_val))
+# print(confusion_matrix(val_y, pred_val)) # confusion_matrix - pateikia matricos forma, kurioje parodyta kiek tiksliai buvo prognozuota teisingai, kiek buvo klaidingai prognozuota teigiamai ir kiek buvo klaidingai prognozuota neigiamai
 
 
-# predictions = model.predict(df_test)
-# # print(predictions)
+predictions = model.predict(df_test)
+# print(predictions)
 
-# result_df = pd.DataFrame({'PassengerId': df_test.index, 'Survived': predictions}) # sukuria DataFrame su nurodytais stulpeliais
+result_df = pd.DataFrame({'PassengerId': df_test.index, 'Survived': predictions}) # sukuria DataFrame su nurodytais stulpeliais
 # print(result_df)
-# result_df.to_csv('titanic_predictions.csv', index=False) # to_csv - issaugo DataFrame i csv faila, index - nurodo ar issaugoti indexa, jei False - neissaugoti indexa
+result_df.to_csv('titanic_predictions.csv', index=False) # to_csv - issaugo DataFrame i csv faila, index - nurodo ar issaugoti indexa, jei False - neissaugoti indexa
 # print(model.coef_)
-# test = [[3, 1, 22.0, 1, 0, 7.25]] answers [3, 1]
+# test = [[3, 1, 22.0, 1, 0, 7.25]] answers [3, 1],
 
