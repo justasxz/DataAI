@@ -10,6 +10,8 @@ from sklearn import tree
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+import numpy as np
+
 
 df = sns.load_dataset('titanic')
 print(df)
@@ -21,7 +23,19 @@ df.dropna(inplace=True)
 x_train, x_val, y_train, y_val = train_test_split(df.drop('survived', axis=1), df['survived'], test_size=0.2, random_state=42) # train_test_split - padalina duomenis i mokymo ir testavimo duomenis, test_size - nurodo kiek procentu duomenu naudoti testavimui, random_state - nurodo atsitiktinumo sėklą, kad rezultatai būtų atkuriami
 
 from sklearn.svm import SVC
-model = SVC(C=1000)
+# base_model = SVC(C=1000)
+from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+# model = BaggingClassifier(base_model,n_estimators=50, max_samples=200, max_features=6, random_state=42)
+# model = AdaBoostClassifier(base_model,n_estimators=50)
+model = RandomForestClassifier(random_state=42)
+
+params = {"max_depth": [1,3,5,7,10],
+          "n_estimators": [50,100,200,500,1000],
+          "min_samples_leaf": [2,5,10,20,40]
+          }
+
+model = GridSearchCV(model,param_grid=params,n_jobs=-1,cv=5,verbose=1)
 
 # model = DecisionTreeClassifier(min_samples_split=15, min_samples_leaf=3) # DecisionTreeClassifier - sukuria sprendimų medžio klasifikatoriaus modelį, max_depth - nurodo maksimalų medžio gylį
 # model_knn = KNeighborsClassifier(n_neighbors=5)
