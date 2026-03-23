@@ -44,17 +44,20 @@ X_test_scaled = scaler.transform(X_test_raw)
 # 7. Modelio kūrimas
 model = keras.Sequential([
     keras.layers.Input(shape=(X_scaled.shape[1],)),
-    keras.layers.Dense(32, activation="relu"), # Padidinau iki 8, kad būtų šiek tiek daugiau "talpos"
     keras.layers.Dense(16, activation="relu"),
-    keras.layers.Dense(8, activation="relu"),
+    keras.layers.Dropout(0.1), # nuresetinti keleta neuronų svorių atsitiktinai į nulį
+    keras.layers.Dense(16, activation="relu"),
     keras.layers.Dense(1, activation="sigmoid")
 ])
-
-model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
-
+adam_op = keras.optimizers.Adam(learning_rate=0.1)
+model.compile(optimizer=adam_op, loss="binary_crossentropy", metrics=["accuracy"])
+model.summary()
+es = keras.callbacks.EarlyStopping(patience=13,restore_best_weights=True)
+rlr = keras.callbacks.ReduceLROnPlateau(factor=0.5,patience=3, min_lr=0.0001)
+checkpoint = keras.callbacks.ModelCheckpoint(filepath="models/best_model.keras",save_best_only=True)
 # 8. Apmokymas
-model.fit(X_scaled, y, batch_size=8, epochs=20, validation_split=0.15, verbose=1)
-
+model.fit(X_scaled, y, batch_size=8, epochs=500, validation_split=0.15, verbose=1, callbacks=[es,rlr,checkpoint])
+# model = keras.saving.load_model(r"models/best_model.keras")
 # 9. Prognozės
 y_pred_prob = model.predict(X_test_scaled).flatten()
 # Konvertuojame tikimybes į 0 arba 1 (sigmoid grąžina reikšmes nuo 0 iki 1)
@@ -66,3 +69,18 @@ result_df.to_csv('titanic_predictions.csv', index=False)
 
 print("\nPrognozės sėkmingai išsaugotos į 'titanic_predictions.csv'!")
 print("Naudotas backend:", keras.backend.backend())
+
+# import random
+
+# ats = random.randint(0,10)
+
+# # ivestis = int(input("Iveskite savo spejima"))
+
+# for i in range(0,11):
+
+#     if i == ats:
+#         print("Atspejote")
+#         print(f"skaicius yra: {i}")
+#         break
+#     else:
+#         print("Deja neatspejote")
