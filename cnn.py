@@ -53,4 +53,4 @@ model.compile(
 )
 model.summary()
 # Apmokymas
-# history = model.fit(x_train, y_train, epochs=3, batch_size=64, validation_split=0.1)
+# history = model.fit(x_train, y_train, epochs=3, batch_size=64, validation_split=0.1)  
