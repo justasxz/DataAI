@@ -55,9 +55,9 @@ dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=
 # 4. Modelio kūrimas su Keras 3
 model = keras.Sequential([
     keras.layers.Embedding(input_dim=vocab_size, output_dim=128, mask_zero=True), # [5,9,24,17,4...] -> [(7,2),(1,4),(8,15)]
-    keras.layers.SimpleRNN(256, return_sequences=True),
+    keras.layers.LSTM(8, return_sequences=True),
     keras.layers.Dropout(0.2),
-    keras.layers.SimpleRNN(256, return_sequences=True),
+    keras.layers.LSTM(8, return_sequences=True),
     keras.layers.Dense(vocab_size) # 10000 [0.001,0.0000015,0.02]
 ])
 
