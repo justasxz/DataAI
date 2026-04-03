@@ -216,3 +216,4 @@ __marimo__/
 .streamlit/secrets.toml
 data/wiki_giga_2024_50_MFT20_vectors_seed_123_alpha_0.75_eta_0.075_combined.txt
 results/
+gpt2-finetuned/
